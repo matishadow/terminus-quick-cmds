@@ -28,8 +28,15 @@ export class QuickCmdsModalComponent {
     }
 
     quickSend () {
-        this._send(this.app.activeTab, this.quickCmd + (this.appendCR ? "\n" : ""))
-        this.close()
+        for (let cmd of this.cmds)
+        {
+            if (this.elasticIncludes(cmd.name))
+            {
+                this._send(this.app.activeTab, cmd.text + (this.appendCR ? "\n" : ""))
+                this.close()
+                break;
+            }
+        }
     }
 
     quickSendAll() {
@@ -98,7 +105,7 @@ export class QuickCmdsModalComponent {
 
         let cmds = this.cmds
         if (this.quickCmd) {
-            cmds = cmds.filter(cmd => (cmd.name + cmd.group + cmd.text).toLowerCase().includes(this.quickCmd))
+            cmds = cmds.filter(cmd => this.elasticIncludes(cmd.name))
         }
 
         for (let cmd of cmds) {
@@ -113,5 +120,15 @@ export class QuickCmdsModalComponent {
             }
             group.cmds.push(cmd)
         }
+    }
+
+    private elasticIncludes(s: string)
+    {
+        let regexString = "";
+        for (let inputLetter of this.quickCmd)
+            regexString += inputLetter + ".*";
+        let regexp = new RegExp(regexString);
+
+        return regexp.test(s)
     }
 }
